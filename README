@@ -1,0 +1,20 @@
+GoodStuff extension library for C#
+
+This library aims to provide concise and easy to use methods that solve a variety of common problems.
+
+For example, if you want to add 10 numbers to a list, you might do the following:
+
+for(var i = 0; i < 10; i++) {
+    list.Add(i);
+}
+
+A more readable and shorter version using GoodStuff would be the following:
+
+10.Times(i => list.Add(i));
+
+====
+
+Extensions are organized into categories by namespace so that you only need to bring in the kinds of extension methods you like for your project.  The current categories are:
+
+- Natural language - These methods, mostly on primitive types allow for easier iteration, creation of number ranges, and utility checks such as IsNull
+- Reflection - These methods encapsulate the complexities of reflection based programming to give a more dynamic language feel
