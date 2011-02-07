@@ -1,0 +1,5 @@
+bin
+*.pidb
+.DS_Store
+*.userprefs
+test-results
