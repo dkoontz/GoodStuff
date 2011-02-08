@@ -4,32 +4,45 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using GoodStuff.NaturalLanguage;
 
-namespace GoodStuff
-{
+namespace GoodStuff {
 	[TestFixture()]
-	public class NaturalLanguageTests
-	{
+	public class IntTests {
 		// Times
 		[Test()]
-		public void TimesShouldIterate0Times()
-		{
+		public void TimesShouldIterate0Times() {
 			var counter = 0;
 			0.Times(i => counter++);
 			Assert.AreEqual(0, counter);
 		}
 		
 		[Test()]
-		public void TimesShouldIterate5Times()
-		{
+		public void TimesShouldIterate5Times() {
 			var counter = 0;
 			5.Times(i => counter++);
 			Assert.AreEqual(5, counter);
 		}
 		
+		[Test()]
+		public void UpToShouldIterate3Times() {
+			var counter = 0;
+			1.UpTo(3, i => counter++);
+			Assert.AreEqual(3, counter);
+		}
+		
+		[Test()]
+		public void DownToShouldIterate3Times() {
+			var counter = 0;
+			3.DownTo(1, i => counter++);
+			Assert.AreEqual(3, counter);
+		}
+		
+	}
+	
+	[TestFixture()]
+	public class IEnumerableTests {
 		// Each
 		[Test()]
-		public void EachIteratesOverEveryItem()
-		{
+		public void EachIteratesOverEveryItem()	{
 			var values = new int[] {1,2,3,4,5};
 			var sum = 0;
 			values.Each(i => sum += i);
@@ -37,8 +50,7 @@ namespace GoodStuff
 		}
 		
 		[Test()]
-		public void EachWorksWithEmptyCollections()
-		{
+		public void EachWorksWithEmptyCollections()	{
 			var values = new int[] {};
 			var run = false;
 			values.Each(i => run = true);
@@ -47,8 +59,7 @@ namespace GoodStuff
 		
 		//EachWithIndex
 		[Test()]
-		public void EachWithIndexProvidesBothValueAndIndex()
-		{
+		public void EachWithIndexProvidesBothValueAndIndex() {
 			var values = new string[] {"first", "second"};
 			var valuesFromLambda = new List<object>();
 			values.EachWithIndex((e, i) => {
