@@ -11,14 +11,14 @@ namespace GoodStuff {
 		[Test()]
 		public void TimesShouldIterate0Times() {
 			var counter = 0;
-			0.Times(i => counter++);
+			0.Times(() => counter++);
 			Assert.AreEqual(0, counter);
 		}
 		
 		[Test()]
 		public void TimesShouldIterate5Times() {
 			var counter = 0;
-			5.Times(i => counter++);
+			5.Times(() => counter++);
 			Assert.AreEqual(5, counter);
 		}
 		
