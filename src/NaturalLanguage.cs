@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -68,25 +69,192 @@ namespace GoodStuff
 			}
 		}
 		
+		public static class FloatExtensions {
+			/// <summary>
+			/// Maps a value in one range to the equivalent value in another range.
+			/// </summary>
+			public static float MapToRange(this float value, float range1Min, float range1Max, float range2Min, float range2Max) {
+				return MapToRange(value, range1Min, range1Max, range2Min, range2Max, true);
+			}
+				
+			/// <summary>
+			/// Maps a value in one range to the equivalent value in another range.  Clamps the value to be valid within the range if clamp is specified as true.
+			/// </summary>
+			public static float MapToRange(this float value, float range1Min, float range1Max, float range2Min, float range2Max, bool clamp) {
+				
+				value = range2Min + ((value - range1Min) / (range1Max - range1Min)) * (range2Max - range2Min);
+				
+				if(clamp) {
+					if(range2Min < range2Max) {
+						if(value > range2Max) value = range2Max;
+						if(value < range2Min) value = range2Min;
+					}
+					// Range that go negative are possible, for example from 0 to -1
+					else {
+						if(value > range2Min) value = range2Min;
+						if(value < range2Max) value = range2Max;
+					}
+				}
+				return value;
+			}
+		}
+		
 		public static class IEnumerableExtensions {
 			/// <summary>
-			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback
+			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.
 			/// </summary>
-			public static void Each<T>(this IEnumerable<T> iteratable, Action<T> callback) {
-				foreach(var value in iteratable) {
+			public static void Each<T>(this IEnumerable<T> iterable, Action<T> callback) {
+				foreach(var value in iterable) {
 					callback(value);
 				}
 			}
 			
 			/// <summary>
-			/// Iterates over each element in the IEnumerable, passing in the element and the index to the provided callback
+			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.  Since the IEnumerable is
+			/// not generic, a type must be specified as a type parameter to Each.
 			/// </summary>
-			public static void EachWithIndex<T>(this IEnumerable<T> iteratable, Action<T, int> callback) {
+			/// <description>
+			/// IEnumerable myCollection = new List<int>();
+			/// ...
+			/// myCollection.Each<int>(i => Debug.Log("i: " + i));
+			/// </description>
+			public static void Each<T>(this IEnumerable iterable, Action<T> callback) {
+				foreach(T value in iterable) {
+					callback(value);
+				}
+			}
+			
+//			/// <summary>
+//			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.
+//			/// </summary>
+//			public static void Each(this IEnumerable iterable, Action<object> callback) {
+//				foreach(object value in iterable) {
+//					callback(value);
+//				}
+//			}
+			
+			/// <summary>
+			/// Iterates over each element in the IEnumerable, passing in the element and the index to the provided callback.
+			/// </summary>
+			public static void EachWithIndex<T>(this IEnumerable<T> iterable, Action<T, int> callback) {
 				var i = 0;
-				foreach(var value in iteratable) {
+				foreach(var value in iterable) {
 					callback(value, i);
 					++i;
 				}
+			}
+			
+			/// <summary>
+			/// Iterates over each element in the IEnumerable, passing in the element and the index to the provided callback.
+			/// </summary>
+			public static void EachWithIndex<T>(this IEnumerable iterable, Action<T, int> callback) {
+				var i = 0;
+				foreach(T value in iterable) {
+					callback(value, i);
+					++i;
+				}
+			}
+			
+			/// <summary>
+			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
+			/// </summary>
+			public static void InParallelWith<T, U>(this IEnumerable<T> iterable1, IEnumerable<U> iterable2, Action<T, U> callback) {
+				if(iterable1.Count() != iterable2.Count()) throw new ArgumentException(string.Format("Both IEnumerables must be the same length, iterable1: {0}, iterable2: {2}", iterable1.Count(), iterable2.Count()));
+				
+				var i1Enumerator = iterable1.GetEnumerator();
+				var i2Enumerator = iterable2.GetEnumerator();
+				
+				while(i1Enumerator.MoveNext()) {
+					i2Enumerator.MoveNext();
+					callback(i1Enumerator.Current, i2Enumerator.Current);
+				}
+			}
+			
+			/// <summary>
+			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
+			/// </summary>
+			public static void InParallelWith(this IEnumerable iterable1, IEnumerable iterable2, Action<object, object> callback) {
+				var i1Enumerator = iterable1.GetEnumerator();
+				var i2Enumerator = iterable2.GetEnumerator();
+				var i1Count = 0;
+				var i2Count = 0;
+				while(i1Enumerator.MoveNext()) ++i1Count;
+				while(i2Enumerator.MoveNext()) ++i2Count;
+				if(i1Count != i2Count) throw new ArgumentException(string.Format("Both IEnumerables must be the same length, iterable1: {0}, iterable2: {2}", i1Count, i2Count));
+				
+				i1Enumerator.Reset();
+				i2Enumerator.Reset();
+				while(i1Enumerator.MoveNext()) {
+					i2Enumerator.MoveNext();
+					callback(i1Enumerator.Current, i2Enumerator.Current);
+				}
+			}
+			
+			public static bool IsEmpty<T>(this IEnumerable<T> iterable) {
+				return iterable.Count() == 0;
+			}
+			
+			public static bool IsEmpty(this IEnumerable iterable) {
+				// MoveNext returns false if we are at the end of the collection
+				return !iterable.GetEnumerator().MoveNext();
+			}
+		}
+		
+		public static class ArrayExtensions {
+			/// <summary>
+			/// Returns the first index in the array where the target exists.  If the target cannot be found, returns -1.
+			/// </summary>
+			public static int IndexOf<T>(this T[] array, T target) {
+				for(var i = 0; i < array.Length; ++i) {
+					if(array[i].Equals(target)) return i;
+				}
+				return -1;
+			}
+		}
+		
+		public static class ListExtensions {
+			/// <summary>
+			/// Returns a sub-section of the current list, starting at the specified index and continuing to the end of the list.
+			/// </summary>
+			public static List<T> FromIndexToEnd<T>(this List<T> list, int start) {
+				return list.GetRange(start, list.Count - start);
+			}
+			
+			/// <summary>
+			/// Returns the first index in the List<T> where the target exists.  If the target cannot be found, returns -1.
+			/// </summary>
+			public static int IndexOf<T>(this List<T> list, T target) {
+				for(var i = 0; i < list.Count; ++i) {
+					if(list[i].Equals(target)) return i;
+				}
+				return -1;
+			}
+		}
+		
+		public static class DictionaryExtensions {
+			/// <summary>
+			/// Iterates over a Dictionary<T> passing in both the key and value to the provided callback.
+			/// </summary>
+			public static void Each<T1, T2>(this Dictionary<T1, T2> dictionary, Action<T1, T2> callback) {
+				foreach(var keyValuePair in dictionary) {
+					callback(keyValuePair.Key, keyValuePair.Value);
+				}
+			}
+		}
+		
+		public static class TypeExtensions {
+			/// <summary>
+			/// Returns an array of all concrete subclasses of the provided type.
+			/// </summary>
+			public static Type[] Subclasses(this Type type) {
+				return type.Assembly.GetTypes().Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
+			}
+			
+			/// <summary>
+			/// Returns an array of the provided type and all concrete subclasses of that type.
+			/// </summary>
+			public static Type[] TypeAndSubclasses(this Type type) {
+				return type.Assembly.GetTypes().Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
 			}
 		}
 	}
