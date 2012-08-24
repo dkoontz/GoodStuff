@@ -247,14 +247,18 @@ namespace GoodStuff
 			/// Returns an array of all concrete subclasses of the provided type.
 			/// </summary>
 			public static Type[] Subclasses(this Type type) {
-				return type.Assembly.GetTypes().Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
+				var typeList = new List<System.Type>();
+				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
+				return typeList.Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
 			}
 			
 			/// <summary>
 			/// Returns an array of the provided type and all concrete subclasses of that type.
 			/// </summary>
 			public static Type[] TypeAndSubclasses(this Type type) {
-				return type.Assembly.GetTypes().Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
+				var typeList = new List<System.Type>();
+				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
+				return typeList.Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
 			}
 		}
 	}
