@@ -7,6 +7,9 @@ using System.Collections.Generic;
 namespace GoodStuff
 {
 	namespace NaturalLanguage {
+		
+		public delegate bool Predicate<T1, T2>(T1 item1, T2 item2);
+		
 		public static class IntExtensions {
 			/// <summary>
 			/// Calls the provided callback action repeatedly.
@@ -29,7 +32,7 @@ namespace GoodStuff
 			}
 			
 			/// <summary>
-			/// Iterates from the start up to the given value, calling the provided callback with each value in the sequence.
+			/// Iterates from the start up to the given end value inclusive, calling the provided callback with each value in the sequence.
 			/// </summary>
 			/// <description>
 			/// Used to iterate from a start value to a target value
@@ -49,7 +52,7 @@ namespace GoodStuff
 			}
 			
 			/// <summary>
-			/// Iterates from the start down to the given value, calling the provided callback with each value in the sequence.
+			/// Iterates from the start down to the given end value inclusive, calling the provided callback with each value in the sequence.
 			/// </summary>
 			/// <description>
 			/// Used to iterate from a start value to a target value
@@ -213,6 +216,10 @@ namespace GoodStuff
 		}
 		
 		public static class ListExtensions {
+			//TODO: Fix issue of multiple threads accessing in the same millisecond
+			[ThreadStatic]
+			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond);
+			
 			/// <summary>
 			/// Returns a sub-section of the current list, starting at the specified index and continuing to the end of the list.
 			/// </summary>
@@ -229,6 +236,37 @@ namespace GoodStuff
 				}
 				return -1;
 			}
+			
+			/// Returns a randomly selected item from List<T>
+			public static T RandomElement<T>(this List<T> list) {
+				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
+				
+				return list[randomNumberGenerator.Next(list.Count)];
+			}
+			
+			/// Returns a randomly selected item from List<T> determined by a float array of weights
+			public static T RandomElement<T>(this List<T> list, float[] weights) {
+				return list.RandomElement(weights.ToList());
+			}
+			
+			/// Returns a randomly selected item from List<T> determined by a List<float> of weights
+			public static T RandomElement<T>(this List<T> list, List<float> weights) {
+				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
+				if(list.Count() != weights.Count()) throw new IndexOutOfRangeException("List of weights must be the same size as input list");
+		
+				var randomWeight = randomNumberGenerator.NextDouble() * weights.Sum();
+				var totalWeight = 0f;
+				var index = weights.FindIndex(weight => {
+					totalWeight += weight;
+					return randomWeight <= totalWeight;
+				});
+				
+				return list[index];
+			}
+			
+			public static List<T> Shuffle<T>(this List<T> list) {
+				return list.OrderBy(e => randomNumberGenerator.Next()).ToList();
+			}
 		}
 		
 		public static class DictionaryExtensions {
@@ -240,6 +278,58 @@ namespace GoodStuff
 					callback(keyValuePair.Key, keyValuePair.Value);
 				}
 			}
+			
+			public static void RemoveAll<T1, T2>(this Dictionary<T1, T2> dictionary, Predicate<T1, T2> callback) {
+				var keysToRemove = new List<T1>();
+				foreach(var keyValuePair in dictionary) {
+					if(callback(keyValuePair.Key, keyValuePair.Value)) {
+						keysToRemove.Add(keyValuePair.Key);
+					}
+				}
+				
+				foreach(var key in keysToRemove) {
+					dictionary.Remove(key);
+				}
+			}
+		}
+		
+		public static class StringExtensions {
+			public static T ToEnum<T>(this string enumValueName) {
+				return (T)Enum.Parse(typeof(T), enumValueName);
+			}
+			
+			public static T ToEnum<T>(this string enumValueName, bool ignoreCase) {
+				return (T)Enum.Parse(typeof(T), enumValueName, ignoreCase);
+			}
+			
+			public static string Last(this string value, int count) {
+				if(count > value.Length) throw new ArgumentOutOfRangeException(string.Format("Cannot return more characters than exist in the string (wanted {0} string contains {1}", count, value.Length));
+				
+				return value.Substring(value.Length - count, count);
+			}
+			
+			public static string SnakeCase(this string camelizedString) {
+				var parts = new List<string>();
+		        var currentWord = new StringBuilder();
+		
+		        foreach(var c in camelizedString) {
+		            if (char.IsUpper(c) && currentWord.Length > 0) {
+		                parts.Add(currentWord.ToString());
+		                currentWord = new StringBuilder();
+		            }
+		            currentWord.Append(char.ToLower(c));
+		        }
+		
+		        if(currentWord.Length > 0) {
+		            parts.Add(currentWord.ToString());
+		        }
+		
+		        return string.Join("_", parts.ToArray());
+			}
+			
+			public static string Capitalize(this string word) {
+				return word.Substring(0, 1).ToUpper() + word.Substring(1);
+			}
 		}
 		
 		public static class TypeExtensions {
@@ -247,14 +337,18 @@ namespace GoodStuff
 			/// Returns an array of all concrete subclasses of the provided type.
 			/// </summary>
 			public static Type[] Subclasses(this Type type) {
-				return type.Assembly.GetTypes().Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
+				var typeList = new List<System.Type>();
+				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
+				return typeList.Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
 			}
 			
 			/// <summary>
 			/// Returns an array of the provided type and all concrete subclasses of that type.
 			/// </summary>
 			public static Type[] TypeAndSubclasses(this Type type) {
-				return type.Assembly.GetTypes().Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
+				var typeList = new List<System.Type>();
+				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
+				return typeList.Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
 			}
 		}
 	}
