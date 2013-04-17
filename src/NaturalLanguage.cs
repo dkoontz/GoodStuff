@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Collections;
@@ -201,9 +202,91 @@ namespace GoodStuff
 				// MoveNext returns false if we are at the end of the collection
 				return !iterable.GetEnumerator().MoveNext();
 			}
+
+#region MoreLINQ project code
+			// MinBy and MoreBy methods are provided via the MoreLINQ project (c) Jon Skeet 
+			// https://code.google.com/p/morelinq/source/browse/MoreLinq/MinBy.cs
+			// https://code.google.com/p/morelinq/source/browse/MoreLinq/MaxBy.cs
+
+			/// <summary>
+			/// Returns the first element that has the smallest value (as determined by the selector) within the collection 
+			/// (as determined by the comparer).  This is equivalent to using Min except that the element itself
+			/// is returned, and not the value used to make the Min determination.
+			/// </summary>
+			public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector) {
+				return source.MinBy(selector, Comparer<TKey>.Default);
+			}
+
+			/// <summary>
+			/// Returns the first element that has the smallest value (as determined by the selector) within the collection 
+			/// (as determined by the comparer).  This is equivalent to using Min except that the element itself
+			/// is returned, and not the value used to make the Min determination.
+			/// </summary>
+			public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector, IComparer<TKey> comparer)
+			{
+				if (source == null) throw new ArgumentNullException("source");
+				if (selector == null) throw new ArgumentNullException("selector");
+				if (comparer == null) throw new ArgumentNullException("comparer");
+				using (var sourceIterator = source.GetEnumerator()) {
+					if (!sourceIterator.MoveNext()) {
+						throw new InvalidOperationException("Sequence contains no elements");
+					}
+					var minValue = sourceIterator.Current;
+					var minKey = selector(minValue);
+					while (sourceIterator.MoveNext()) {
+						var candidate = sourceIterator.Current;
+						var candidateProjected = selector(candidate);
+						if (comparer.Compare(candidateProjected, minKey) < 0) {
+							minValue = candidate;
+							minKey = candidateProjected;
+						}
+					}
+					return minValue;
+				}
+			}
+
+			/// <summary>
+			/// Returns the first element that has the largest value (as determined by the selector) within the collection 
+			/// (as determined by the comparer).  This is equivalent to using Max except that the element itself
+			/// is returned, and not the value used to make the Max determination.
+			/// </summary>
+			public static TSource MaxBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector) {
+				return source.MaxBy(selector, Comparer<TKey>.Default);
+			}
+
+			/// <summary>
+			/// Returns the first element that has the largest value (as determined by the selector) within the collection 
+			/// (as determined by the comparer).  This is equivalent to using Max except that the element itself
+			/// is returned, and not the value used to make the Max determination.
+			/// </summary>
+			public static TSource MaxBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector, IComparer<TKey> comparer) {
+				if (source == null) throw new ArgumentNullException("source");
+				if (selector == null) throw new ArgumentNullException("selector");
+				if (comparer == null) throw new ArgumentNullException("comparer");
+				using (var sourceIterator = source.GetEnumerator()) {
+					if (!sourceIterator.MoveNext()) {
+						throw new InvalidOperationException("Sequence contains no elements");
+					}
+					var maxValue = sourceIterator.Current;
+					var maxKey = selector(maxValue);
+					while (sourceIterator.MoveNext()) {
+						var candidate = sourceIterator.Current;
+						var candidateProjected = selector(candidate);
+						if (comparer.Compare(candidateProjected, maxKey) > 0) {
+							maxValue = candidate;
+							maxKey = candidateProjected;
+						}
+					}
+					return maxValue;
+				}
+			}
+#endregion
 		}
 		
 		public static class ArrayExtensions {
+			[ThreadStatic]
+			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond + System.Threading.Thread.CurrentThread.GetHashCode());
+			
 			/// <summary>
 			/// Returns the first index in the array where the target exists.  If the target cannot be found, returns -1.
 			/// </summary>
@@ -213,12 +296,68 @@ namespace GoodStuff
 				}
 				return -1;
 			}
+			
+			/// <summary>
+			/// Returns a sub-section of the current array, starting at the specified index and continuing to the end of the array.
+			/// </summary>
+			public static T[] FromIndexToEnd<T>(this T[] array, int start) {
+				var subSection = new T[array.Length - start];
+				array.CopyTo(subSection, start);
+				return subSection;
+			}
+
+			/// <summary>
+			/// Wrapper for System.Array.FindIndex to allow it to be called directly on an array.
+			/// </summary>
+			public static int FindIndex<T>(this T[] array, Predicate<T> match) {
+				return Array.FindIndex(array, match);
+			}
+
+			/// <summary>
+			/// Wrapper for System.Array.FindIndex to allow it to be called directly on an array.
+			/// </summary>
+			public static int FindIndex<T>(this T[] array, int startIndex, Predicate<T> match) {
+				return Array.FindIndex(array, startIndex, match);
+			}
+
+			/// <summary>
+			/// Wrapper for System.Array.FindIndex to allow it to be called directly on an array.
+			/// </summary>
+			public static int FindIndex<T>(this T[] array, int startIndex, int count, Predicate<T> match) {
+				return Array.FindIndex(array, startIndex, count, match);
+			}
+
+			/// Returns a randomly selected item from the array
+			public static T RandomElement<T>(this T[] array) {
+				if(array.Length == 0) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty array");
+				
+				return array[randomNumberGenerator.Next(array.Length)];
+			}
+			
+			/// Returns a randomly selected item from the array determined by a float array of weights
+			public static T RandomElement<T>(this T[] array, float[] weights) {
+				return array.RandomElement(weights.ToList());
+			}
+			
+			/// Returns a randomly selected item from the array determined by a List<float> of weights
+			public static T RandomElement<T>(this T[] array, List<float> weights) {
+				if(array.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty array");
+				if(array.Count() != weights.Count()) throw new IndexOutOfRangeException("array of weights must be the same size as input array");
+		
+				var randomWeight = randomNumberGenerator.NextDouble() * weights.Sum();
+				var totalWeight = 0f;
+				var index = weights.FindIndex(weight => {
+					totalWeight += weight;
+					return randomWeight <= totalWeight;
+				});
+				
+				return array[index];
+			}
 		}
 		
 		public static class ListExtensions {
-			//TODO: Fix issue of multiple threads accessing in the same millisecond
 			[ThreadStatic]
-			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond);
+			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond + System.Threading.Thread.CurrentThread.GetHashCode());
 			
 			/// <summary>
 			/// Returns a sub-section of the current list, starting at the specified index and continuing to the end of the list.
