@@ -433,6 +433,15 @@ namespace GoodStuff
 		}
 		
 		public static class StringExtensions {
+			/// <summary>
+			/// Interpolates the arguments into the string using string.Format
+			/// </summary>
+			/// <param name="formatString">The string to be interpolated into</param>
+			/// <param name="args">The values to be interpolated into the string </param>
+			public static string Interpolate(this string formatString, params object[] args) {
+				return string.Format(formatString, args);
+			}
+
 			public static T ToEnum<T>(this string enumValueName) {
 				return (T)Enum.Parse(typeof(T), enumValueName);
 			}
