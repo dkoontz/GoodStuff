@@ -158,6 +158,28 @@ namespace GoodStuff
 					++i;
 				}
 			}
+
+			/// <summary>
+			/// Iterates over each element in the two dimensional array, passing in the index to the provided callback.
+			/// </summary>
+			public static void EachIndex<T>(this IEnumerable<T> iterable, Action<int> callback) {
+				var i = 0;
+				foreach(var value in iterable) {
+					callback(i);
+					++i;
+				}
+			}
+
+			/// <summary>
+			/// Iterates over each element in the two dimensional array, passing in the index to the provided callback.
+			/// </summary>
+			public static void EachIndex<T>(this IEnumerable iterable, Action<int> callback) {
+				var i = 0;
+				foreach(T value in iterable) {
+					callback(i);
+					++i;
+				}
+			}
 			
 			/// <summary>
 			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
@@ -352,6 +374,28 @@ namespace GoodStuff
 				});
 				
 				return array[index];
+			}
+
+			/// <summary>
+			/// Iterates over each element in the two dimensional array, passing in the element and the index to the provided callback.
+			/// </summary>
+			public static void EachWithIndex<T>(this T[,] collection, Action<T, int, int> callback) {
+				for(var x = 0; x < collection.GetLength(0); ++x) {
+					for (var y = 0; y < collection.GetLength(1); ++y) {
+						callback(collection[x,y], x, y);
+					}
+				}
+			}
+
+			/// <summary>
+			/// Iterates over each element in the two dimensional array, passing in the index to the provided callback.
+			/// </summary>
+			public static void EachIndex<T>(this T[,] collection, Action<int, int> callback) {
+				for(var x = 0; x < collection.GetLength(0); ++x) {
+					for (var y = 0; y < collection.GetLength(1); ++y) {
+						callback(x, y);
+					}
+				}
 			}
 		}
 		
