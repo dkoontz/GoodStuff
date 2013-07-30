@@ -21,7 +21,21 @@ namespace GoodStuff {
 			5.Times(() => counter++);
 			Assert.AreEqual(5, counter);
 		}
-		
+
+		[Test()]
+		public void TimesShouldIterate0TimesAndHaveParam() {
+			var counter = 0;
+			0.Times(i => counter += i);
+			Assert.AreEqual(0, counter);
+		}
+
+		[Test()]
+		public void TimesShouldIterate5TimesAndHaveParam() {
+			var counter = 0;
+			5.Times(i => counter += i);
+			Assert.AreEqual(0+1+2+3+4, counter);
+		}
+
 		[Test()]
 		public void UpToShouldIterate3Times() {
 			var counter = 0;

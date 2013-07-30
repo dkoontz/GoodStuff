@@ -12,9 +12,17 @@ A more readable and shorter version using GoodStuff would be the following:
 
 10.Times(i => list.Add(i));
 
+Many GoodStuff method add iteration capabilities.  In this example we iterate over both list1 and list2 in parallel and then print out the resulting string using Interpolate which internally uses string.Format.
+
+var list1 = new [] {10, 20, 30, 40, 50};
+var list2 = new [] {"ten", "twenty", "thirty", "forty", "fifty"};
+list1.InParallelWith(list2, (first, second) => {
+	Console.WriteLine("{0} = {1}".Interpolate(first, second));
+});
+
 ====
 
 Extensions are organized into categories by namespace so that you only need to bring in the kinds of extension methods you like for your project.  The current categories are:
 
-- Natural language - These methods, mostly on primitive types allow for easier iteration, creation of number ranges, and utility checks such as IsNull
-- Reflection - These methods encapsulate the complexities of reflection based programming to give a more dynamic language feel
+- NaturalLanguage - These methods, mostly on primitive types, allow for easier iteration, creation of number ranges, and utility operations such as Shuffle.
+- Unity - These methods add functionality to Unity (http://unity3d.com) types such as converting between Vector3 and Vector2.
