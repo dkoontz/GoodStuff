@@ -3,12 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodStuff", "GoodStuff.csproj", "{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodStuffTests", "GoodStuffTests\GoodStuffTests.csproj", "{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}.Release|Any CPU.ActiveCfg = Release|Any CPU

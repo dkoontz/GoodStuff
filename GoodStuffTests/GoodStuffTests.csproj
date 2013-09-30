@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}</ProjectGuid>
+    <ProjectGuid>{0B3E2AB3-6757-4E3D-8E3D-FEBA99A6B14F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>GoodStuff</RootNamespace>
-    <AssemblyName>GoodStuff</AssemblyName>
+    <RootNamespace>GoodStuffTests</RootNamespace>
+    <AssemblyName>GoodStuffTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -16,34 +16,34 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>none</DebugType>
-    <Optimize>false</Optimize>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Applications\Unity\Unity.app\Contents\PlaybackEngines\MacStandalonePlayer\Managed\UnityEngine.dll</HintPath>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="src\NaturalLanguage.cs" />
-    <Compile Include="src\Unity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="NaturalLanguageTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Tests\" />
-    <Folder Include="src\" />
+    <ProjectReference Include="..\GoodStuff.csproj">
+      <Project>{AB5B07E0-0C86-42AD-86FC-172DFBAE37CA}</Project>
+      <Name>GoodStuff</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
