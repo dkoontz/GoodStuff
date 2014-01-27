@@ -491,7 +491,17 @@ namespace GoodStuff {
 			}
 			
 			public static List<T> Shuffle<T>(this List<T> list) {
-				return list.OrderBy(e => randomNumberGenerator.Next()).ToList();
+				// OrderBy and Sort are both broken for AOT compliation on older MonoTouch versions
+				// https://bugzilla.xamarin.com/show_bug.cgi?id=2155#c11
+				var shuffledList = new List<T>(list);
+				T temp;
+				for (var i = 0; i < shuffledList.Count; ++i) {
+					temp = shuffledList[i];
+					var swapIndex = randomNumberGenerator.Next(0, list.Count);
+					shuffledList[i] = shuffledList[swapIndex];
+					shuffledList[swapIndex] = temp;
+				}
+				return shuffledList;
 			}
 		}
 
@@ -502,6 +512,16 @@ namespace GoodStuff {
 			public static void Each<T1, T2>(this Dictionary<T1, T2> dictionary, Action<T1, T2> callback) {
 				foreach(var keyValuePair in dictionary) {
 					callback(keyValuePair.Key, keyValuePair.Value);
+				}
+			}
+
+			/// <summary>
+			/// Iterates over a Dictionary<T> passing in both the key and value to the provided callback.
+			/// </summary>
+			public static void EachWithIndex<T1, T2>(this Dictionary<T1, T2> dictionary, Action<T1, T2, int> callback) {
+				var i = 0;
+				foreach(var keyValuePair in dictionary) {
+					callback(keyValuePair.Key, keyValuePair.Value, i++);
 				}
 			}
 			
