@@ -32,9 +32,9 @@ using System.Collections.Generic;
 
 namespace GoodStuff {
 	namespace NaturalLanguage {
-		
+
 		public delegate bool Predicate<T1, T2>(T1 item1, T2 item2);
-		
+
 		public static class IntExtensions {
 			/// <summary>
 			/// Calls the provided callback action repeatedly.
@@ -75,7 +75,7 @@ namespace GoodStuff {
 					callback(i);
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates from the start up to the given end value inclusive, calling the provided callback with each value in the sequence.
 			/// </summary>
@@ -95,7 +95,7 @@ namespace GoodStuff {
 					callback(i);
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates from the start down to the given end value inclusive, calling the provided callback with each value in the sequence.
 			/// </summary>
@@ -116,7 +116,7 @@ namespace GoodStuff {
 				}
 			}
 		}
-		
+
 		public static class FloatExtensions {
 			/// <summary>
 			/// Maps a value in one range to the equivalent value in another range.
@@ -124,14 +124,14 @@ namespace GoodStuff {
 			public static float MapToRange(this float value, float range1Min, float range1Max, float range2Min, float range2Max) {
 				return MapToRange(value, range1Min, range1Max, range2Min, range2Max, true);
 			}
-				
+
 			/// <summary>
 			/// Maps a value in one range to the equivalent value in another range.  Clamps the value to be valid within the range if clamp is specified as true.
 			/// </summary>
 			public static float MapToRange(this float value, float range1Min, float range1Max, float range2Min, float range2Max, bool clamp) {
-				
+
 				value = range2Min + ((value - range1Min) / (range1Max - range1Min)) * (range2Max - range2Min);
-				
+
 				if(clamp) {
 					if(range2Min < range2Max) {
 						if(value > range2Max) value = range2Max;
@@ -145,8 +145,12 @@ namespace GoodStuff {
 				}
 				return value;
 			}
+
+			public static int ToPercent(this float value) {
+				return Convert.ToInt32(value * 100);
+			}
 		}
-		
+
 		public static class IEnumerableExtensions {
 			/// <summary>
 			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.
@@ -156,7 +160,7 @@ namespace GoodStuff {
 					callback(value);
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.  Since the IEnumerable is
 			/// not generic, a type must be specified as a type parameter to Each.
@@ -171,16 +175,16 @@ namespace GoodStuff {
 					callback(value);
 				}
 			}
-			
-//			/// <summary>
-//			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.
-//			/// </summary>
-//			public static void Each(this IEnumerable iterable, Action<object> callback) {
-//				foreach(object value in iterable) {
-//					callback(value);
-//				}
-//			}
-			
+
+			//			/// <summary>
+			//			/// Iterates over each element in the IEnumerable, passing in the element to the provided callback.
+			//			/// </summary>
+			//			public static void Each(this IEnumerable iterable, Action<object> callback) {
+			//				foreach(object value in iterable) {
+			//					callback(value);
+			//				}
+			//			}
+
 			/// <summary>
 			/// Iterates over each element in the IEnumerable, passing in the element and the index to the provided callback.
 			/// </summary>
@@ -191,7 +195,7 @@ namespace GoodStuff {
 					++i;
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates over each element in the IEnumerable, passing in the element and the index to the provided callback.
 			/// </summary>
@@ -208,7 +212,9 @@ namespace GoodStuff {
 			/// </summary>
 			public static void EachIndex<T>(this IEnumerable<T> iterable, Action<int> callback) {
 				var i = 0;
+				#pragma warning disable 0168
 				foreach(var value in iterable) {
+					#pragma warning restore 0168
 					callback(i);
 					++i;
 				}
@@ -219,27 +225,29 @@ namespace GoodStuff {
 			/// </summary>
 			public static void EachIndex<T>(this IEnumerable iterable, Action<int> callback) {
 				var i = 0;
+				#pragma warning disable 0219
 				foreach(T value in iterable) {
+					#pragma warning restore 0219
 					callback(i);
 					++i;
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
 			/// </summary>
 			public static void InParallelWith<T, U>(this IEnumerable<T> iterable1, IEnumerable<U> iterable2, Action<T, U> callback) {
 				if(iterable1.Count() != iterable2.Count()) throw new ArgumentException(string.Format("Both IEnumerables must be the same length, iterable1: {0}, iterable2: {1}", iterable1.Count(), iterable2.Count()));
-				
+
 				var i1Enumerator = iterable1.GetEnumerator();
 				var i2Enumerator = iterable2.GetEnumerator();
-				
+
 				while(i1Enumerator.MoveNext()) {
 					i2Enumerator.MoveNext();
 					callback(i1Enumerator.Current, i2Enumerator.Current);
 				}
 			}
-			
+
 			/// <summary>
 			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
 			/// </summary>
@@ -251,7 +259,7 @@ namespace GoodStuff {
 				while(i1Enumerator.MoveNext()) ++i1Count;
 				while(i2Enumerator.MoveNext()) ++i2Count;
 				if(i1Count != i2Count) throw new ArgumentException(string.Format("Both IEnumerables must be the same length, iterable1: {0}, iterable2: {1}", i1Count, i2Count));
-				
+
 				i1Enumerator.Reset();
 				i2Enumerator.Reset();
 				while(i1Enumerator.MoveNext()) {
@@ -259,17 +267,17 @@ namespace GoodStuff {
 					callback(i1Enumerator.Current, i2Enumerator.Current);
 				}
 			}
-			
+
 			public static bool IsEmpty<T>(this IEnumerable<T> iterable) {
 				return iterable.Count() == 0;
 			}
-			
+
 			public static bool IsEmpty(this IEnumerable iterable) {
 				// MoveNext returns false if we are at the end of the collection
 				return !iterable.GetEnumerator().MoveNext();
 			}
 
-#region MoreLINQ project code
+			#region MoreLINQ project code
 			// MinBy and MoreBy methods are provided via the MoreLINQ project (c) Jon Skeet 
 			// https://code.google.com/p/morelinq/source/browse/MoreLinq/MinBy.cs
 			// https://code.google.com/p/morelinq/source/browse/MoreLinq/MaxBy.cs
@@ -345,13 +353,13 @@ namespace GoodStuff {
 					return maxValue;
 				}
 			}
-#endregion
+			#endregion
 		}
-		
+
 		public static class ArrayExtensions {
 			[ThreadStatic]
 			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond + System.Threading.Thread.CurrentThread.GetHashCode());
-			
+
 			/// <summary>
 			/// Returns the first index in the array where the target exists.  If the target cannot be found, returns -1.
 			/// </summary>
@@ -361,7 +369,7 @@ namespace GoodStuff {
 				}
 				return -1;
 			}
-			
+
 			/// <summary>
 			/// Returns a sub-section of the current array, starting at the specified index and continuing to the end of the array.
 			/// </summary>
@@ -395,27 +403,27 @@ namespace GoodStuff {
 			/// Returns a randomly selected item from the array
 			public static T RandomElement<T>(this T[] array) {
 				if(array.Length == 0) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty array");
-				
+
 				return array[randomNumberGenerator.Next(array.Length)];
 			}
-			
+
 			/// Returns a randomly selected item from the array determined by a float array of weights
 			public static T RandomElement<T>(this T[] array, float[] weights) {
 				return array.RandomElement(weights.ToList());
 			}
-			
+
 			/// Returns a randomly selected item from the array determined by a List<float> of weights
 			public static T RandomElement<T>(this T[] array, List<float> weights) {
 				if(array.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty array");
 				if(array.Count() != weights.Count()) throw new IndexOutOfRangeException("array of weights must be the same size as input array");
-		
+
 				var randomWeight = randomNumberGenerator.NextDouble() * weights.Sum();
 				var totalWeight = 0f;
 				var index = weights.FindIndex(weight => {
 					totalWeight += weight;
 					return randomWeight <= totalWeight;
 				});
-				
+
 				return array[index];
 			}
 
@@ -441,18 +449,18 @@ namespace GoodStuff {
 				}
 			}
 		}
-		
+
 		public static class ListExtensions {
 			[ThreadStatic]
 			static System.Random randomNumberGenerator = new Random(DateTime.Now.Millisecond + System.Threading.Thread.CurrentThread.GetHashCode());
-			
+
 			/// <summary>
 			/// Returns a sub-section of the current list, starting at the specified index and continuing to the end of the list.
 			/// </summary>
 			public static List<T> FromIndexToEnd<T>(this List<T> list, int start) {
 				return list.GetRange(start, list.Count - start);
 			}
-			
+
 			/// <summary>
 			/// Returns the first index in the List<T> where the target exists.  If the target cannot be found, returns -1.
 			/// </summary>
@@ -462,34 +470,34 @@ namespace GoodStuff {
 				}
 				return -1;
 			}
-			
+
 			/// Returns a randomly selected item from List<T>
 			public static T RandomElement<T>(this List<T> list) {
 				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
-				
+
 				return list[randomNumberGenerator.Next(list.Count)];
 			}
-			
+
 			/// Returns a randomly selected item from List<T> determined by a float array of weights
 			public static T RandomElement<T>(this List<T> list, float[] weights) {
 				return list.RandomElement(weights.ToList());
 			}
-			
+
 			/// Returns a randomly selected item from List<T> determined by a List<float> of weights
 			public static T RandomElement<T>(this List<T> list, List<float> weights) {
 				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
 				if(list.Count() != weights.Count()) throw new IndexOutOfRangeException("List of weights must be the same size as input list");
-		
+
 				var randomWeight = randomNumberGenerator.NextDouble() * weights.Sum();
 				var totalWeight = 0f;
 				var index = weights.FindIndex(weight => {
 					totalWeight += weight;
 					return randomWeight <= totalWeight;
 				});
-				
+
 				return list[index];
 			}
-			
+
 			public static List<T> Shuffle<T>(this List<T> list) {
 				// OrderBy and Sort are both broken for AOT compliation on older MonoTouch versions
 				// https://bugzilla.xamarin.com/show_bug.cgi?id=2155#c11
@@ -524,7 +532,7 @@ namespace GoodStuff {
 					callback(keyValuePair.Key, keyValuePair.Value, i++);
 				}
 			}
-			
+
 			public static void RemoveAll<T1, T2>(this Dictionary<T1, T2> dictionary, Predicate<T1, T2> callback) {
 				var keysToRemove = new List<T1>();
 				foreach(var keyValuePair in dictionary) {
@@ -532,13 +540,13 @@ namespace GoodStuff {
 						keysToRemove.Add(keyValuePair.Key);
 					}
 				}
-				
+
 				foreach(var key in keysToRemove) {
 					dictionary.Remove(key);
 				}
 			}
 		}
-		
+
 		public static class StringExtensions {
 			/// <summary>
 			/// Interpolates the arguments into the string using string.Format
@@ -561,41 +569,41 @@ namespace GoodStuff {
 			public static T ToEnum<T>(this string enumValueName) {
 				return (T)Enum.Parse(typeof(T), enumValueName);
 			}
-			
+
 			public static T ToEnum<T>(this string enumValueName, bool ignoreCase) {
 				return (T)Enum.Parse(typeof(T), enumValueName, ignoreCase);
 			}
-			
+
 			public static string Last(this string value, int count) {
 				if(count > value.Length) throw new ArgumentOutOfRangeException(string.Format("Cannot return more characters than exist in the string (wanted {0} string contains {1}", count, value.Length));
-				
+
 				return value.Substring(value.Length - count, count);
 			}
-			
+
 			public static string SnakeCase(this string camelizedString) {
 				var parts = new List<string>();
-		        var currentWord = new StringBuilder();
-		
-		        foreach(var c in camelizedString) {
-		            if (char.IsUpper(c) && currentWord.Length > 0) {
-		                parts.Add(currentWord.ToString());
-		                currentWord = new StringBuilder();
-		            }
-		            currentWord.Append(char.ToLower(c));
-		        }
-		
-		        if(currentWord.Length > 0) {
-		            parts.Add(currentWord.ToString());
-		        }
-		
-		        return string.Join("_", parts.ToArray());
+				var currentWord = new StringBuilder();
+
+				foreach(var c in camelizedString) {
+					if (char.IsUpper(c) && currentWord.Length > 0) {
+						parts.Add(currentWord.ToString());
+						currentWord = new StringBuilder();
+					}
+					currentWord.Append(char.ToLower(c));
+				}
+
+				if(currentWord.Length > 0) {
+					parts.Add(currentWord.ToString());
+				}
+
+				return string.Join("_", parts.ToArray());
 			}
-			
+
 			public static string Capitalize(this string word) {
 				return word.Substring(0, 1).ToUpper() + word.Substring(1);
 			}
 		}
-		
+
 		public static class TypeExtensions {
 			/// <summary>
 			/// Returns an array of all concrete subclasses of the provided type.
@@ -605,7 +613,7 @@ namespace GoodStuff {
 				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
 				return typeList.Where(t => t.IsSubclassOf(type) && !t.IsAbstract).ToArray();
 			}
-			
+
 			/// <summary>
 			/// Returns an array of the provided type and all concrete subclasses of that type.
 			/// </summary>

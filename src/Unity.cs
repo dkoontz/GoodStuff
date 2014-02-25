@@ -57,6 +57,12 @@ namespace GoodStuff {
 				return new Vector2(vector.y, vector.z);
 			}
 		}
+
+		public static class StringExtensions {
+			public static int NameToLayerMask(this string name) {
+				return 1 << LayerMask.NameToLayer(name);
+			}
+		}
 	}
 }
 
