@@ -462,54 +462,91 @@ namespace GoodStuff {
 			}
 
 			/// <summary>
-			/// Returns the first index in the List<T> where the target exists.  If the target cannot be found, returns -1.
+			/// Returns the first index in the IList<T> where the target exists.  If the target cannot be found, returns -1.
 			/// </summary>
-			public static int IndexOf<T>(this List<T> list, T target) {
+			public static int IndexOf<T>(this IList<T> list, T target) {
 				for(var i = 0; i < list.Count; ++i) {
 					if(list[i].Equals(target)) return i;
 				}
 				return -1;
 			}
 
-			/// Returns a randomly selected item from List<T>
-			public static T RandomElement<T>(this List<T> list) {
+			/// Returns a randomly selected item from IList<T>
+			public static T RandomElement<T>(this IList<T> list) {
 				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
 
 				return list[randomNumberGenerator.Next(list.Count)];
 			}
 
-			/// Returns a randomly selected item from List<T> determined by a float array of weights
-			public static T RandomElement<T>(this List<T> list, float[] weights) {
-				return list.RandomElement(weights.ToList());
-			}
-
-			/// Returns a randomly selected item from List<T> determined by a List<float> of weights
-			public static T RandomElement<T>(this List<T> list, List<float> weights) {
+			/// Returns a randomly selected item from IList<T> determined by a IEnumerable<float> of weights
+			public static T RandomElement<T>(this IList<T> list, IEnumerable<float> weights) {
 				if(list.IsEmpty()) throw new IndexOutOfRangeException("Cannot retrieve a random value from an empty list");
-				if(list.Count() != weights.Count()) throw new IndexOutOfRangeException("List of weights must be the same size as input list");
+				if(list.Count != weights.Count()) throw new IndexOutOfRangeException("List of weights must be the same size as input list");
 
 				var randomWeight = randomNumberGenerator.NextDouble() * weights.Sum();
 				var totalWeight = 0f;
-				var index = weights.FindIndex(weight => {
+				var index = 0;
+				foreach(var weight in weights) {
 					totalWeight += weight;
-					return randomWeight <= totalWeight;
-				});
+					if (randomWeight <= totalWeight) {
+						break;
+					}
+				}
 
 				return list[index];
 			}
 
-			public static List<T> Shuffle<T>(this List<T> list) {
+			public static IList<T> Shuffle<T>(this IList<T> list) {
 				// OrderBy and Sort are both broken for AOT compliation on older MonoTouch versions
 				// https://bugzilla.xamarin.com/show_bug.cgi?id=2155#c11
 				var shuffledList = new List<T>(list);
 				T temp;
 				for (var i = 0; i < shuffledList.Count; ++i) {
 					temp = shuffledList[i];
-					var swapIndex = randomNumberGenerator.Next(0, list.Count);
+					var swapIndex = randomNumberGenerator.Next(list.Count);
 					shuffledList[i] = shuffledList[swapIndex];
 					shuffledList[swapIndex] = temp;
 				}
 				return shuffledList;
+			}
+
+			public static IList<T> InPlaceShuffle<T>(this IList<T> list) {
+				// OrderBy and Sort are both broken for AOT compliation on older MonoTouch versions
+				// https://bugzilla.xamarin.com/show_bug.cgi?id=2155#c11
+
+				for (var i = 0; i < list.Count; ++i) {
+					var temp = list[i];
+					var swapIndex = randomNumberGenerator.Next(list.Count);
+					list[i] = list[swapIndex];
+					list[swapIndex] = temp;
+				}
+				return list;
+			}
+
+			public static IList<T> InPlaceOrderBy<T, TKey>(this IList<T> list, Func<T, TKey> elementToSortValue) where TKey : IComparable {
+				// Provides both and in-place sort as well as an AOT on iOS friendly replacement for OrderBy
+				if (list.Count < 2) {
+					return list;
+				}
+
+				int startIndex;
+				int currentIndex;
+				int smallestIndex;
+				T temp;
+
+				for (startIndex = 0; startIndex < list.Count; ++startIndex) {
+					smallestIndex = startIndex;
+					for (currentIndex = startIndex + 1; currentIndex < list.Count; ++currentIndex) {
+						if (elementToSortValue(list[currentIndex]).CompareTo(elementToSortValue(list[smallestIndex])) < 0) {
+							smallestIndex = currentIndex;
+						}
+					}
+					temp = list[startIndex];
+					list[startIndex] = list[smallestIndex];
+					list[smallestIndex] = temp;
+				}
+
+				return list;
 			}
 		}
 
