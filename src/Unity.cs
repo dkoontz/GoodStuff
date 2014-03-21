@@ -63,6 +63,21 @@ namespace GoodStuff {
 				return 1 << LayerMask.NameToLayer(name);
 			}
 		}
+		
+		public static class TransformExtensions {
+			public static void SetParentAndReset(this Transform transform, Transform parent) {
+				transform.parent = parent;
+				transform.localPosition = Vector3.zero;
+				transform.localRotation = Quaternion.identity;
+				transform.localScale = Vector3.one;
+			}
+		}
+		
+		public static class GameObjectExtensions {
+			public static T GetComponentOrInterface<T>(this GameObject go) where T : class {
+				return go.GetComponent(typeof(T)) as T;
+			}
+		}
 	}
 }
 
