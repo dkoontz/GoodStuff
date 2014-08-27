@@ -63,7 +63,7 @@ namespace GoodStuff {
 				return 1 << LayerMask.NameToLayer(name);
 			}
 		}
-		
+
 		public static class TransformExtensions {
 			public static void SetParentAndReset(this Transform transform, Transform parent) {
 				transform.parent = parent;
@@ -71,8 +71,48 @@ namespace GoodStuff {
 				transform.localRotation = Quaternion.identity;
 				transform.localScale = Vector3.one;
 			}
+
+			public static T GetComponentOrInterface<T>(this Transform t) where T : class {
+				return t.GetComponent(typeof(T)) as T;
+			}
+
+			public static void SetLocalPositionX(this Transform transform, float value) {
+				var localPosition = transform.localPosition;
+				localPosition.x = value;
+				transform.localPosition = localPosition;
+			}
+
+			public static void SetLocalPositionY(this Transform transform, float value) {
+				var localPosition = transform.localPosition;
+				localPosition.y = value;
+				transform.localPosition = localPosition;
+			}
+
+			public static void SetLocalPositionZ(this Transform transform, float value) {
+				var localPosition = transform.localPosition;
+				localPosition.z = value;
+				transform.localPosition = localPosition;
+			}
+
+			public static void SetPositionX(this Transform transform, float value) {
+				var position = transform.position;
+				position.x = value;
+				transform.position = position;
+			}
+
+			public static void SetPositionY(this Transform transform, float value) {
+				var position = transform.position;
+				position.y = value;
+				transform.position = position;
+			}
+
+			public static void SetPositionZ(this Transform transform, float value) {
+				var position = transform.position;
+				position.z = value;
+				transform.position = position;
+			}
 		}
-		
+
 		public static class GameObjectExtensions {
 			public static T GetComponentOrInterface<T>(this GameObject go) where T : class {
 				return go.GetComponent(typeof(T)) as T;

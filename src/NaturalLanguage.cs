@@ -115,6 +115,14 @@ namespace GoodStuff {
 					callback(i);
 				}
 			}
+
+			public static bool IsEven(this int value) {
+				return value % 2 == 0;
+			}
+
+			public static bool IsOdd(this int value) {
+				return value % 2 == 1;
+			}
 		}
 
 		public static class FloatExtensions {
@@ -275,6 +283,23 @@ namespace GoodStuff {
 			public static bool IsEmpty(this IEnumerable iterable) {
 				// MoveNext returns false if we are at the end of the collection
 				return !iterable.GetEnumerator().MoveNext();
+			}
+
+			public static bool IsNotEmpty<T>(this IEnumerable<T> iterable) {
+				return iterable.Count() > 0;
+			}
+
+			public static bool IsNotEmpty(this IEnumerable iterable) {
+				// MoveNext returns false if we are at the end of the collection
+				return iterable.GetEnumerator().MoveNext();
+			}
+
+			/// <summary>
+			/// Matches all elements where the given condition is not true. This is the
+			/// opposite of Linq's Where clause.
+			/// </summary>
+			public static IEnumerable<T> ExceptWhere<T>(this IEnumerable<T> iterable, Func<T, bool> condition) {
+				return iterable.Where(element => !condition(element));
 			}
 
 			#region MoreLINQ project code
@@ -548,6 +573,39 @@ namespace GoodStuff {
 
 				return list;
 			}
+
+			/// <summary>
+			/// Attempts to Insert the item, but Adds it if the index is invalid.
+			/// </summary>
+			public static void InsertOrAdd<T>(this IList<T> list, int atIndex, T item) {
+				if (atIndex >= 0 && atIndex < list.Count) {
+					list.Insert(atIndex, item);
+				} else {
+					list.Add(item);
+				}
+			}
+
+			/// <summary>
+			/// Returns the element after the given element. This can wrap. If the element is the only one in the list, itself is returned.
+			/// </summary>
+			public static T ElementAfter<T>(this IList<T> list, T element, bool wrap = true) {
+				var targetIndex = list.IndexOf(element) + 1;
+				if (wrap) {
+					return targetIndex >= list.Count ? list[0] : list[targetIndex];
+				}
+				return list[targetIndex];
+			}
+
+			/// <summary>
+			/// Returns the element before the given element. This can wrap. If the element is the only one in the list, itself is returned.
+			/// </summary>
+			public static T ElementBefore<T>(this IList<T> list, T element, bool wrap = true) {
+				var targetIndex = list.IndexOf(element) - 1;
+				if (wrap) {
+					return targetIndex < 0 ? list[list.Count - 1] : list[targetIndex];
+				}
+				return list[targetIndex];
+			}
 		}
 
 		public static class DictionaryExtensions {
@@ -658,6 +716,24 @@ namespace GoodStuff {
 				var typeList = new List<System.Type>();
 				System.AppDomain.CurrentDomain.GetAssemblies().Each(a => typeList.AddRange(a.GetTypes()));
 				return typeList.Where(t => (t == type || t.IsSubclassOf(type)) && !t.IsAbstract).ToArray();
+			}
+		}
+
+		public static class EnumExtensions {
+			/// <summary>
+			/// Returns the next enum value wrapping to the first value if passed the last
+			/// </summary>
+			public static T Next<T>(this Enum enumValue) {
+				var values = Enum.GetValues(enumValue.GetType());
+				var enumerator = values.GetEnumerator();
+				while (enumerator.MoveNext()) {
+					if (enumerator.Current.Equals(enumValue)) {
+						if (enumerator.MoveNext()) {
+							return (T)enumerator.Current;
+						}
+					}
+				}
+				return default(T);
 			}
 		}
 	}
