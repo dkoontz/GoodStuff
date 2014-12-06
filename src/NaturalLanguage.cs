@@ -725,14 +725,34 @@ namespace GoodStuff {
 			/// </summary>
 			public static T Next<T>(this Enum enumValue) {
 				var values = Enum.GetValues(enumValue.GetType());
-				var enumerator = values.GetEnumerator();
-				while (enumerator.MoveNext()) {
-					if (enumerator.Current.Equals(enumValue)) {
-						if (enumerator.MoveNext()) {
-							return (T)enumerator.Current;
-						}
+				var totalNumberOfValues = values.Length;
+
+				for (var i = 0; i < totalNumberOfValues; ++i) {
+					if (values.GetValue(i).Equals(enumValue)) {
+						return (i == totalNumberOfValues - 1)
+							? (T)values.GetValue(0)
+							: (T)values.GetValue(i + 1);
 					}
 				}
+
+				return default(T);
+			}
+
+			/// <summary>
+			/// Returns the previous enum value wrapping to the last value if passed the first
+			/// </summary>
+			public static T Previous<T>(this Enum enumValue) {
+				var values = Enum.GetValues(enumValue.GetType());
+				var totalNumberOfValues = values.Length;
+
+				for (var i = 0; i < totalNumberOfValues; ++i) {
+					if (values.GetValue(i).Equals(enumValue)) {
+						return (i == 0)
+							? (T)values.GetValue(totalNumberOfValues - 1)
+							: (T)values.GetValue(i - 1);
+					}
+				}
+
 				return default(T);
 			}
 		}
