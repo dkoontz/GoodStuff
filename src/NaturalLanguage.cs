@@ -243,6 +243,32 @@ namespace GoodStuff {
 
 			/// <summary>
 			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
+			/// Stops as soon as either enumerable reaches its end.
+			/// </summary>
+			public static void Zip<T, U>(this IEnumerable<T> iterable1, IEnumerable<U> iterable2, Action<T, U> callback) {
+				var i1Enumerator = iterable1.GetEnumerator();
+				var i2Enumerator = iterable2.GetEnumerator();
+
+				while(i1Enumerator.MoveNext() && i2Enumerator.MoveNext()) {
+					callback(i1Enumerator.Current, i2Enumerator.Current);
+				}
+			}
+
+			/// <summary>
+			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
+			/// Stops as soon as either enumerable reaches its end.
+			/// </summary>
+			public static void Zip(this IEnumerable iterable1, IEnumerable iterable2, Action<object, object> callback) {
+				var i1Enumerator = iterable1.GetEnumerator();
+				var i2Enumerator = iterable2.GetEnumerator();
+
+				while(i1Enumerator.MoveNext() && i2Enumerator.MoveNext()) {
+					callback(i1Enumerator.Current, i2Enumerator.Current);
+				}
+			}
+
+			/// <summary>
+			/// Iterates over each element in both the iterable1 and iterable2 collections, passing in the current element of each collection into the provided callback.
 			/// </summary>
 			public static void InParallelWith<T, U>(this IEnumerable<T> iterable1, IEnumerable<U> iterable2, Action<T, U> callback) {
 				if(iterable1.Count() != iterable2.Count()) throw new ArgumentException(string.Format("Both IEnumerables must be the same length, iterable1: {0}, iterable2: {1}", iterable1.Count(), iterable2.Count()));
@@ -673,6 +699,10 @@ namespace GoodStuff {
 				if(count > value.Length) throw new ArgumentOutOfRangeException(string.Format("Cannot return more characters than exist in the string (wanted {0} string contains {1}", count, value.Length));
 
 				return value.Substring(value.Length - count, count);
+			}
+
+			public static bool IsNullOrEmpty(this string value) {
+				return value == null || string.IsNullOrEmpty(value);
 			}
 
 			public static string SnakeCase(this string camelizedString) {
